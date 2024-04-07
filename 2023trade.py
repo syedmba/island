@@ -470,7 +470,8 @@ class Trader:
         and outputs a list of orders to be sent
         """
         # Initialize the method output dict as an empty dict
-        result = {'AMETHYSTS' : [], 'STARFRUIT' : [], 'COCONUTS' : [], 'PINA_COLADAS' : [], 'DIVING_GEAR' : [], 'BERRIES' : [], 'DIP' : [], 'BAGUETTE' : [], 'UKULELE' : [], 'PICNIC_BASKET' : []}
+        result = {'AMETHYSTS' : []} #, 'STARFRUIT' : []
+        # , 'COCONUTS' : [], 'PINA_COLADAS' : [], 'DIVING_GEAR' : [], 'BERRIES' : [], 'DIP' : [], 'BAGUETTE' : [], 'UKULELE' : [], 'PICNIC_BASKET' : []
 
         # Iterate over all the keys (the available products) contained in the order dephts
         for key, val in state.position.items():
@@ -479,28 +480,28 @@ class Trader:
         for key, val in self.position.items():
             print(f'{key} position: {val}')
 
-        assert abs(self.position.get('UKULELE', 0)) <= self.POSITION_LIMIT['UKULELE']
+        # assert abs(self.position.get('UKULELE', 0)) <= self.POSITION_LIMIT['UKULELE']
 
         timestamp = state.timestamp
 
-        if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
-            self.STARFRUIT_cache.pop(0)
-        if len(self.coconuts_cache) == self.coconuts_dim:
-            self.coconuts_cache.pop(0)
+        # if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
+        #     self.STARFRUIT_cache.pop(0)
+        # if len(self.coconuts_cache) == self.coconuts_dim:
+        #     self.coconuts_cache.pop(0)
 
-        _, bs_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].sell_orders.items())))
-        _, bb_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].buy_orders.items(), reverse=True)), 1)
+        # _, bs_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].sell_orders.items())))
+        # _, bb_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].buy_orders.items(), reverse=True)), 1)
 
-        self.STARFRUIT_cache.append((bs_STARFRUIT+bb_STARFRUIT)/2)
+        # self.STARFRUIT_cache.append((bs_STARFRUIT+bb_STARFRUIT)/2)
 
         INF = 1e9
     
         STARFRUIT_lb = -INF
         STARFRUIT_ub = INF
 
-        if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
-            STARFRUIT_lb = self.calc_next_price_STARFRUIT()-1
-            STARFRUIT_ub = self.calc_next_price_STARFRUIT()+1
+        # if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
+        #     STARFRUIT_lb = self.calc_next_price_STARFRUIT()-1
+        #     STARFRUIT_ub = self.calc_next_price_STARFRUIT()+1
 
         AMETHYSTS_lb = 10000
         AMETHYSTS_ub = 10000
@@ -578,5 +579,8 @@ class Trader:
         print(f"Timestamp {timestamp}, Total PNL ended up being {totpnl}")
         # print(f'Will trade {result}')
         print("End transmission")
-                
-        return result
+        print(result)
+        traderData = "NameError" # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.
+        
+        conversions = 1
+        return result, conversions, traderData
