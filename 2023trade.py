@@ -97,7 +97,7 @@ class Trader:
         sell_vol, best_sell_pr = self.values_extract(osell)
         buy_vol, best_buy_pr = self.values_extract(obuy, 1)
 
-        cpos = self.position[product]
+        cpos = self.position[product] # current position
 
         mx_with_buy = -1
 
