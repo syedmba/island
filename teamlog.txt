@@ -1,0 +1,8 @@
+Mon, 8 Apr
+- using bid-ask spread to trade in amethysts
+- starfruits not yet implemented
+- for starfruit could consider sinusoidal fitting / oscillators / moving averages
+- which one depends on historical trends
+- do starfruit oscillate back and forth
+- do bullish/bearish trends persist for long durations
+
