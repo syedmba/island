@@ -5,15 +5,14 @@ import string
 class Trader:
     
     def run(self, state: TradingState):
+        # Only method required. It takes all buy and sell orders for all symbols as an input, and outputs a list of orders to be sent
         print("traderData: " + state.traderData)
         print("Observations: " + str(state.observations))
-
-				# Orders to be placed on exchange matching engine
         result = {}
         for product in state.order_depths:
             order_depth: OrderDepth = state.order_depths[product]
             orders: List[Order] = []
-            acceptable_price = 10  # Participant should calculate this value
+            acceptable_price = 10;  # Participant should calculate this value
             print("Acceptable price : " + str(acceptable_price))
             print("Buy Order depth : " + str(len(order_depth.buy_orders)) + ", Sell order depth : " + str(len(order_depth.sell_orders)))
     
@@ -31,10 +30,8 @@ class Trader:
             
             result[product] = orders
     
-		    # String value holding Trader state data required. 
-				# It will be delivered as TradingState.traderData on next execution.
-        traderData = "SAMPLE" 
+    
+        traderData = "SAMPLE" # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.
         
-				# Sample conversion request. Check more details below. 
         conversions = 1
         return result, conversions, traderData
