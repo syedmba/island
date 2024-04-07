@@ -59,17 +59,17 @@ class Trader:
     std = 25
     basket_std = 117
 
-    def calc_next_price_STARFRUIT(self):
-        # STARFRUIT cache stores price from 1 day ago, current day resp
-        # by price, here we mean mid price
+    # def calc_next_price_STARFRUIT(self):
+    #     # STARFRUIT cache stores price from 1 day ago, current day resp
+    #     # by price, here we mean mid price
 
-        coef = [-0.01869561,  0.0455032 ,  0.16316049,  0.8090892]
-        intercept = 4.481696494462085
-        nxt_price = intercept
-        for i, val in enumerate(self.STARFRUIT_cache):
-            nxt_price += val * coef[i]
+    #     coef = [-0.01869561,  0.0455032 ,  0.16316049,  0.8090892]
+    #     intercept = 4.481696494462085
+    #     nxt_price = intercept
+    #     for i, val in enumerate(self.STARFRUIT_cache):
+    #         nxt_price += val * coef[i]
 
-        return int(round(nxt_price))
+    #     return int(round(nxt_price))
 
     def values_extract(self, order_dict, buy=0):
         tot_vol = 0
@@ -208,7 +208,7 @@ class Trader:
 
         return orders
     
-    def compute_orders_c_and_pc(self, order_depth):
+    # def compute_orders_c_and_pc(self, order_depth):
         orders = {'COCONUTS' : [], 'PINA_COLADAS' : []}
         prods = ['COCONUTS', 'PINA_COLADAS']
         coef = 1.875
@@ -266,7 +266,7 @@ class Trader:
 
         return orders
     
-    def compute_orders_basket(self, order_depth):
+    # def compute_orders_basket(self, order_depth):
 
         orders = {'DIP' : [], 'BAGUETTE': [], 'UKULELE' : [], 'PICNIC_BASKET' : []}
         prods = ['DIP', 'BAGUETTE', 'UKULELE', 'PICNIC_BASKET']
@@ -351,7 +351,7 @@ class Trader:
 
         return orders
     
-    def compute_orders_dg(self, order_depth, observations):
+    # def compute_orders_dg(self, order_depth, observations):
         orders = {'DIVING_GEAR' : []}
         prods = ['DIVING_GEAR']
         osell, obuy, best_sell, best_buy, worst_sell, worst_buy, mid_price, vol_buy, vol_sell = {}, {}, {}, {}, {}, {}, {}, {}, {}
@@ -394,7 +394,7 @@ class Trader:
 
         return orders
     
-    def compute_orders_br(self, order_depth, timestamp):
+    # def compute_orders_br(self, order_depth, timestamp):
         orders = {'BERRIES' : []}
         prods = ['BERRIES']
         osell, obuy, best_sell, best_buy, worst_sell, worst_buy, mid_price, vol_buy, vol_sell = {}, {}, {}, {}, {}, {}, {}, {}, {}
@@ -461,8 +461,8 @@ class Trader:
 
         if product == "AMETHYSTS":
             return self.compute_orders_AMETHYSTS(product, order_depth, acc_bid, acc_ask)
-        if product == "STARFRUIT":
-            return self.compute_orders_regression(product, order_depth, acc_bid, acc_ask, self.POSITION_LIMIT[product])
+        # if product == "STARFRUIT":
+        #     return self.compute_orders_regression(product, order_depth, acc_bid, acc_ask, self.POSITION_LIMIT[product])
         
     def run(self, state: TradingState) -> Dict[str, List[Order]]:
         """
@@ -512,14 +512,14 @@ class Trader:
 
         self.steps += 1
 
-        for product in state.market_trades.keys():
-            for trade in state.market_trades[product]:
-                if trade.buyer == trade.seller:
-                    continue
-                self.person_position[trade.buyer][product] = 1.5
-                self.person_position[trade.seller][product] = -1.5
-                self.person_actvalof_position[trade.buyer][product] += trade.quantity
-                self.person_actvalof_position[trade.seller][product] += -trade.quantity
+        # for product in state.market_trades.keys():
+        #     for trade in state.market_trades[product]:
+        #         if trade.buyer == trade.seller:
+        #             continue
+        #         self.person_position[trade.buyer][product] = 1.5
+        #         self.person_position[trade.seller][product] = -1.5
+        #         self.person_actvalof_position[trade.buyer][product] += trade.quantity
+        #         self.person_actvalof_position[trade.seller][product] += -trade.quantity
 
         # orders = self.compute_orders_c_and_pc(state.order_depths)
         # result['PINA_COLADAS'] += orders['PINA_COLADAS']
@@ -535,7 +535,7 @@ class Trader:
         # result['BAGUETTE'] += orders['BAGUETTE']
         # result['UKULELE'] += orders['UKULELE']
 
-        for product in ['AMETHYSTS', 'STARFRUIT']:
+        for product in ['AMETHYSTS']: #, 'STARFRUIT'
             order_depth: OrderDepth = state.order_depths[product]
             orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product])
             result[product] += orders
