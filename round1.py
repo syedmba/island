@@ -78,7 +78,7 @@ class Trader:
         # need to read last few timestamps (what is a good period?) 
         # do we only buy exactly at crossover or do we check crossover that is "reasonably recent"
 
-        
+
         return
 
     def compute_orders_AMETHYSTS(self, product, order_depth, acc_bid, acc_ask):
@@ -269,5 +269,5 @@ class Trader:
         print(result)
         traderData = "NameError" # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.
         
-        conversions = 1
+        conversions = 0
         return result, conversions, traderData
