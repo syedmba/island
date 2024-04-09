@@ -78,7 +78,7 @@ class Trader:
         # need to read last few timestamps (what is a good period?) 
         # do we only buy exactly at crossover or do we check crossover that is "reasonably recent"
 
-        
+
         return
 
     def compute_orders_AMETHYSTS(self, product, order_depth, acc_bid, acc_ask):
