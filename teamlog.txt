@@ -6,3 +6,15 @@ Mon, 8 Apr
 - do starfruit oscillate back and forth
 - do bullish/bearish trends persist for long durations
 
+- there are N goldfish passing by, where N is unknown
+- each team will get the same goldfish passing by, that is, the 
+  prices each team encounters shall be the same
+- goldfish reserve price lies between 900 and 1000
+- P(R <= 1000) = 1
+
+Tue, 9 Apr
+- solved probability distribution to get E(R1) = 967 and E(R2) = 985.05
+- hence low bid = 967 and high bid = 985
+
+Wed, 10 Apr
+- 
