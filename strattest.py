@@ -185,9 +185,9 @@ class Trader:
             count += Trade.quantity
         current_avg_market_price = price / count
         
-        price_history_pearls = np.append(price_history_pearls, current_avg_market_price)
-        if len(price_history_pearls) >= history_length+1:
-            price_history_pearls = price_history_pearls[1:]
+        price_history_starfruit = np.append(price_history_starfruit, current_avg_market_price)
+        if len(price_history_starfruit) >= history_length+1:
+            price_history_starfruit = price_history_starfruit[1:]
         
         
         rate = 20
@@ -195,10 +195,10 @@ class Trader:
             
         if state.timestamp >= start_trading:
 
-            df_pearl_prices = pd.DataFrame(price_history_pearls, columns=['mid_price'])
+            df_starfruit_prices = pd.DataFrame(price_history_starfruit, columns=['mid_price'])
             
-            sma = get_sma(df_pearl_prices['mid_price'], rate).to_numpy()
-            std = get_std(df_pearl_prices['mid_price'], rate).to_numpy()
+            sma = get_sma(df_starfruit_prices['mid_price'], rate).to_numpy()
+            std = get_std(df_starfruit_prices['mid_price'], rate).to_numpy()
 
             upper_curr = sma[-1] + m * std
             upper_prev = sma[-2] + m * std
@@ -211,7 +211,7 @@ class Trader:
                 best_ask = min(order_depth.sell_orders.keys())
                 best_ask_volume = order_depth.sell_orders[best_ask]
 
-                if price_history_pearls[-2] > lower_prev and best_ask <= lower_curr and np.abs(best_ask_volume) > 0:
+                if price_history_starfruit[-2] > lower_prev and best_ask <= lower_curr and np.abs(best_ask_volume) > 0:
                     print("BUY", "STARFRUIT", str(-best_ask_volume) + "x", best_ask)
                     orders.append(Order("STARFRUIT", best_ask, -best_ask_volume))
 
@@ -219,7 +219,7 @@ class Trader:
                 best_bid = max(order_depth.buy_orders.keys())
                 best_bid_volume = order_depth.buy_orders[best_bid]
                 
-                if price_history_pearls[-2] < upper_prev and best_bid >= upper_curr and best_bid_volume > 0:
+                if price_history_starfruit[-2] < upper_prev and best_bid >= upper_curr and best_bid_volume > 0:
                     print("SELL", "STARFRUIT", str(best_bid_volume) + "x", best_bid)
                     orders.append(Order("STARFRUIT", best_bid, -best_bid_volume))
 
@@ -290,7 +290,7 @@ class Trader:
         result = {'AMETHYSTS' : [], 'STARFRUIT' : []}
 
         global price_history_banana
-        global price_history_pearls
+        global price_history_starfruit
         
         # Iterate over all the keys (the available products) contained in the order dephts
         for key, val in state.position.items():
