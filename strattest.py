@@ -167,7 +167,7 @@ class Trader:
         return orders
 
     
-    def compute_orders_STARFRUIT(self, order_depth, state):
+    def compute_orders_STARFRUIT(self, product, order_depth, state):
         orders: list[Order] = []
 
         start_trading = 2100
