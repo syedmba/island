@@ -103,22 +103,22 @@ class Trader:
                 orders.append(Order(product, ask, order_for))
 
         mprice_actual = (best_sell_pr + best_buy_pr)/2
-        mprice_ours = (acc_bid+acc_ask)/2
+        mprice_ours = (acc_bid + acc_ask)/2
 
         undercut_buy = best_buy_pr + 1
         undercut_sell = best_sell_pr - 1
 
-        bid_pr = min(undercut_buy, acc_bid-1) # we will shift this by 1 to beat this price
-        sell_pr = max(undercut_sell, acc_ask+1)
+        bid_pr = min(undercut_buy, acc_bid - 1) # we will shift this by 1 to beat this price
+        sell_pr = max(undercut_sell, acc_ask + 1)
 
         if (cpos < self.POSITION_LIMIT['AMETHYSTS']) and (self.position[product] < 0):
             num = min(40, self.POSITION_LIMIT['AMETHYSTS'] - cpos)
-            orders.append(Order(product, min(undercut_buy + 1, acc_bid-1), num))
+            orders.append(Order(product, min(undercut_buy + 1, acc_bid - 1), num))
             cpos += num
 
         if (cpos < self.POSITION_LIMIT['AMETHYSTS']) and (self.position[product] > 15):
             num = min(40, self.POSITION_LIMIT['AMETHYSTS'] - cpos)
-            orders.append(Order(product, min(undercut_buy - 1, acc_bid-1), num))
+            orders.append(Order(product, min(undercut_buy - 1, acc_bid - 1), num))
             cpos += num
 
         if cpos < self.POSITION_LIMIT['AMETHYSTS']:
@@ -130,7 +130,7 @@ class Trader:
 
         for bid, vol in obuy.items():
             if ((bid > acc_ask) or ((self.position[product]>0) and (bid == acc_ask))) and cpos > -self.POSITION_LIMIT['AMETHYSTS']:
-                order_for = max(-vol, -self.POSITION_LIMIT['AMETHYSTS']-cpos)
+                order_for = max(-vol, -self.POSITION_LIMIT['AMETHYSTS'] - cpos)
                 # order_for is a negative number denoting how much we will sell
                 cpos += order_for
                 assert(order_for <= 0)
@@ -269,5 +269,5 @@ class Trader:
         print(result)
         traderData = "NameError" # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.
         
-        conversions = 1
+        conversions = 0
         return result, conversions, traderData
