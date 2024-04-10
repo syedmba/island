@@ -7,6 +7,7 @@ import math
 import copy
 import numpy as np
 import pandas as pd
+import jsonpickle
 
 empty_dict = {'AMETHYSTS' : 0, 'STARFRUIT' : 0}
 
@@ -16,8 +17,8 @@ def get_sma(prices, rate):
 def get_std(prices, rate):
     return prices.rolling(rate).std()
 
-price_history_starfruit = np.array([])
-price_history_amethysts = np.array([])
+# price_history_starfruit = np.array([])
+# price_history_amethysts = np.array([])
 
 
 
@@ -27,6 +28,10 @@ def def_value():
 INF = int(1e9)
 
 class Trader:
+
+    def __init__(self):
+        price_history_starfruit = np.array([])
+        # price_history_amethysts = np.array([])
 
     position = copy.deepcopy(empty_dict)
     POSITION_LIMIT = {'AMETHYSTS' : 20, 'STARFRUIT' : 20}
@@ -287,9 +292,11 @@ class Trader:
         # Initialize the method output dict as an empty dict
         result = {'AMETHYSTS' : [], 'STARFRUIT' : []}
 
-        global price_history_banana
+        # global price_history_amethysts
         global price_history_starfruit
         
+        price_history_starfruit = jsonpickle.decode(traderData)
+
         # Iterate over all the keys (the available products) contained in the order dephts
         for key, val in state.position.items():
             self.position[key] = val
@@ -340,7 +347,8 @@ class Trader:
         # print(f'Will trade {result}')
         print("End transmission")
         print(result)
-        traderData = "NameError" # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.
+        traderData = jsonpickle.encode(price_history_starfruit) 
+        # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.
         
         conversions = 0
         return result, conversions, traderData
