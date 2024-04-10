@@ -170,7 +170,7 @@ class Trader:
         return orders
 
     
-    def compute_orders_STARFRUIT(self, product, order_depth, state):
+    def compute_orders_STARFRUIT(self, product, order_depth, state, price_history_starfruit):
         orders: list[Order] = []
 
         start_trading = 2100
@@ -179,7 +179,7 @@ class Trader:
         history_length = 10
         spread = 3
         
-
+        print(price_history_starfruit)
         price = 0
         count = 0.000001
 
@@ -200,6 +200,8 @@ class Trader:
 
             df_starfruit_prices = pd.DataFrame(price_history_starfruit, columns=['mid_price'])
             
+            print("----------------------")
+            print(df_starfruit_prices)
             sma = get_sma(df_starfruit_prices['mid_price'], rate).to_numpy()
             std = get_std(df_starfruit_prices['mid_price'], rate).to_numpy()
 
@@ -226,7 +228,7 @@ class Trader:
                     print("SELL", "STARFRUIT", str(best_bid_volume) + "x", best_bid)
                     orders.append(Order("STARFRUIT", best_bid, -best_bid_volume))
 
-        return orders
+        return orders, price_history_starfruit
 
 
     def compute_orders_regression(self, product, order_depth, acc_bid, acc_ask, LIMIT):
@@ -277,12 +279,12 @@ class Trader:
         return orders
     
 
-    def compute_orders(self, product, order_depth, acc_bid, acc_ask, state):
+    def compute_orders(self, product, order_depth, acc_bid, acc_ask, state, price_history_starfruit):
 
         if product == "AMETHYSTS":
             return self.compute_orders_AMETHYSTS(product, order_depth, acc_bid, acc_ask)
         if product == "STARFRUIT":
-            return self.compute_orders_STARFRUIT(product, order_depth, state)
+            return self.compute_orders_STARFRUIT(product, order_depth, state, price_history_starfruit)[0]
         
     def run(self, state: TradingState) -> Dict[str, List[Order]]:
         """
@@ -295,7 +297,10 @@ class Trader:
         # global price_history_amethysts
         global price_history_starfruit
         
-        price_history_starfruit = jsonpickle.decode(traderData)
+        try:
+            price_history_starfruit = jsonpickle.decode(state.traderData)
+        except:
+            price_history_starfruit = np.array([])
 
         # Iterate over all the keys (the available products) contained in the order dephts
         for key, val in state.position.items():
@@ -336,10 +341,20 @@ class Trader:
         self.steps += 1
 
 
-        for product in ['AMETHYSTS', 'STARFRUIT']:
-            order_depth: OrderDepth = state.order_depths[product]
-            orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product], state)
-            result[product] += orders
+        # for product in ['AMETHYSTS', 'STARFRUIT']:
+        #     order_depth: OrderDepth = state.order_depths[product]
+        #     orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product], state)
+        #     result[product] += orders
+
+        product = "AMETHYSTS"
+        order_depth: OrderDepth = state.order_depths[product]
+        result[product] += self.compute_orders_AMETHYSTS(product, order_depth, acc_bid[product], acc_ask[product])
+
+        product = "STARFRUIT"
+        order_depth: OrderDepth = state.order_depths[product]
+        order, price_history_starfruit = self.compute_orders_STARFRUIT(product, order_depth, state, price_history_starfruit)
+        result[product] += order
+
 
         totpnl = 0
 
@@ -347,8 +362,10 @@ class Trader:
         # print(f'Will trade {result}')
         print("End transmission")
         print(result)
-        traderData = jsonpickle.encode(price_history_starfruit) 
+        state.traderData = jsonpickle.encode(price_history_starfruit) 
         # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.
-        
+       
+        traderData = state.traderData
+
         conversions = 0
         return result, conversions, traderData
