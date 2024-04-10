@@ -19,8 +19,6 @@ def get_std(prices, rate):
 price_history_starfruit = np.array([])
 price_history_amethysts = np.array([])
 
-price_history_starfruit = np.array([])
-price_history_amethysts = np.array([])
 
 
 def def_value():
