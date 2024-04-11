@@ -178,15 +178,16 @@ class Trader:
 
         start_trading = 2100
         position_limit = 20
-        current_position = state.position.get("STARFRUIT",0)
+        current_position = state.position.get("STARFRUIT", 0)
         history_length = 10
         spread = 3
         
-        print(price_history_starfruit)
+        print("price_history_starfruit:", price_history_starfruit)
         price = 0
         count = 0.000001
 
         for Trade in state.market_trades.get("STARFRUIT", []):
+            print("Trade:", Trade)
             price += Trade.price * Trade.quantity
             count += Trade.quantity
         current_avg_market_price = price / count
@@ -194,7 +195,6 @@ class Trader:
         price_history_starfruit = np.append(price_history_starfruit, current_avg_market_price)
         if len(price_history_starfruit) >= history_length+1:
             price_history_starfruit = price_history_starfruit[1:]
-        
         
         rate = 20
         m = 2 # of std devs

@@ -25,7 +25,6 @@ class Trader:
     person_actvalof_position = defaultdict(def_value)
 
     cpnl = defaultdict(lambda : 0)
-    
     STARFRUIT_cache = []
     STARFRUIT_dim = 4
     
@@ -44,6 +43,7 @@ class Trader:
     begin_diff_bag = -INF
     begin_bag_price = -INF
     begin_dip_price = -INF
+
 
     def calc_next_price_STARFRUIT(self):
         # STARFRUIT cache stores price from 1 day ago, current day resp
@@ -71,6 +71,14 @@ class Trader:
                 best_val = ask
         
         return tot_vol, best_val
+    
+    def simple_moving_average(self, product, period): 
+        # product is starfruit for now
+        # need to read last few timestamps (what is a good period?) 
+        # do we only buy exactly at crossover or do we check crossover that is "reasonably recent"
+
+
+        return
 
     def compute_orders_AMETHYSTS(self, product, order_depth, acc_bid, acc_ask):
         orders: list[Order] = []
@@ -197,8 +205,8 @@ class Trader:
 
         if product == "AMETHYSTS":
             return self.compute_orders_AMETHYSTS(product, order_depth, acc_bid, acc_ask)
-        if product == "STARFRUIT":
-            return self.compute_orders_regression(product, order_depth, acc_bid, acc_ask, self.POSITION_LIMIT[product])
+        # if product == "STARFRUIT":
+        #     return self.compute_orders_regression(product, order_depth, acc_bid, acc_ask, self.POSITION_LIMIT[product])
         
     def run(self, state: TradingState) -> Dict[str, List[Order]]:
         """
@@ -215,24 +223,26 @@ class Trader:
         for key, val in self.position.items():
             print(f'{key} position: {val}')
 
+        # assert abs(self.position.get('UKULELE', 0)) <= self.POSITION_LIMIT['UKULELE']
+
         timestamp = state.timestamp
 
-        if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
-            self.STARFRUIT_cache.pop(0)
+        # if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
+        #     self.STARFRUIT_cache.pop(0)
 
-        _, bs_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].sell_orders.items())))
-        _, bb_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].buy_orders.items(), reverse=True)), 1)
+        # _, bs_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].sell_orders.items())))
+        # _, bb_STARFRUIT = self.values_extract(collections.OrderedDict(sorted(state.order_depths['STARFRUIT'].buy_orders.items(), reverse=True)), 1)
 
-        self.STARFRUIT_cache.append((bs_STARFRUIT+bb_STARFRUIT)/2)
+        # self.STARFRUIT_cache.append((bs_STARFRUIT+bb_STARFRUIT)/2)
 
         INF = 1e9
     
         STARFRUIT_lb = -INF
         STARFRUIT_ub = INF
 
-        if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
-            STARFRUIT_lb = self.calc_next_price_STARFRUIT() - 1
-            STARFRUIT_ub = self.calc_next_price_STARFRUIT() + 1
+        # if len(self.STARFRUIT_cache) == self.STARFRUIT_dim:
+        #     STARFRUIT_lb = self.calc_next_price_STARFRUIT()-1
+        #     STARFRUIT_ub = self.calc_next_price_STARFRUIT()+1
 
         AMETHYSTS_lb = 10000
         AMETHYSTS_ub = 10000
@@ -245,7 +255,7 @@ class Trader:
         self.steps += 1
 
 
-        for product in ['AMETHYSTS', 'STARFRUIT']:
+        for product in ['AMETHYSTS']: #, 'STARFRUIT'
             order_depth: OrderDepth = state.order_depths[product]
             orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product])
             result[product] += orders
