@@ -71,11 +71,16 @@ class Trader:
 
     #     return int(round(nxt_price))
 
-    def get_sma(self, prices, rate):
-        return np.mean(prices.rolling(window=rate))
+    # def get_sma(self, prices, rate):
+    #     print("prices is as seen")
+    #     print(prices)
+    #     arr = prices.rolling(rate)
+    #     print(arr)
+    #     return arr.mean()
 
-    def get_std(self, prices, rate):
-        return np.std(prices.rolling(window=rate))
+
+    # def get_std(self, prices, rate):
+    #     return prices.rolling(rate).std()
 
     def values_extract(self, order_dict, buy=0):
         tot_vol = 0
@@ -205,15 +210,19 @@ class Trader:
             
             print("----------------------")
             print(df_starfruit_prices)
-            sma = self.get_sma(df_starfruit_prices['mid_price'], rate).to_numpy()
-            std = self.get_std(df_starfruit_prices['mid_price'], rate).to_numpy()
+            # sma = self.get_sma(df_starfruit_prices['mid_price'], rate).to_numpy()
+            sma = pd.DataFrame(columns=['means'])
+            sma = df_starfruit_prices['mid_price'].rolling(rate).mean()
+            # std = self.get_std(df_starfruit_prices['mid_price'], rate).to_numpy()
+            std = pd.DataFrame(columns='stds')
+            std = df_starfruit_prices['mid_price'].rolling(rate).std()
             print("AaAAAAAAAAAA")
             print(sma, std)
 
-            upper_curr = sma[-1] + m * std
-            upper_prev = sma[-2] + m * std
-            lower_curr = sma[-1] - m * std
-            lower_prev = sma[-2] - m * std
+            upper_curr = sma[-1] #+ m * df_starfruit_prices['stds']
+            upper_prev = sma[-2] #+ m * df_starfruit_prices['stds']
+            lower_curr = sma[-1] # - m * df_starfruit_prices['stds']
+            lower_prev = sma[-2] # - m * df_starfruit_prices['stds']
             print(lower_prev)
 
             # holder = price_history_starfruit[-2]
@@ -358,7 +367,7 @@ class Trader:
         #     order_depth: OrderDepth = state.order_depths[product]
         #     orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product], state)
         #     result[product] += orders
-
+        
         product = "AMETHYSTS"
         order_depth: OrderDepth = state.order_depths[product]
         result[product] += self.compute_orders_AMETHYSTS(product, order_depth, acc_bid[product], acc_ask[product])
