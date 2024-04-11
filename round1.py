@@ -206,7 +206,7 @@ class Trader:
         and outputs a list of orders to be sent
         """
         # Initialize the method output dict as an empty dict
-        result = {'AMETHYSTS' : []} #, 'STARFRUIT' : []
+        result = {'AMETHYSTS' : [], 'STARFRUIT' : []}
         
         # Iterate over all the keys (the available products) contained in the order dephts
         for key, val in state.position.items():
