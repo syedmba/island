@@ -27,7 +27,7 @@ class Trader:
     cpnl = defaultdict(lambda : 0)
     
     STARFRUIT_cache = []
-    STARFRUIT_dim = 4
+    STARFRUIT_dim = 3
     
     steps = 0
     
@@ -49,8 +49,10 @@ class Trader:
         # STARFRUIT cache stores price from 1 day ago, current day resp
         # by price, here we mean mid price
 
-        coef = [-0.01869561, 0.0455032, 0.16316049, 0.8090892]
-        intercept = 4.481696494462085
+        # coef = [-0.01869561, 0.0455032, 0.16316049, 0.8090892]
+        # intercept = 4.481696494462085
+        coef = [0.39374153, 0.32139952, 0.28181973]
+        intercept = 15.361666971302839
         nxt_price = intercept
         for i, val in enumerate(self.STARFRUIT_cache):
             nxt_price += val * coef[i]
@@ -211,9 +213,8 @@ class Trader:
         # Iterate over all the keys (the available products) contained in the order dephts
         for key, val in state.position.items():
             self.position[key] = val
-        print()
-        for key, val in self.position.items():
-            print(f'{key} position: {val}')
+        # for key, val in self.position.items():
+        #     print(f'{key} position: {val}')
 
         timestamp = state.timestamp
 
