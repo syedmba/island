@@ -49,10 +49,8 @@ class Trader:
         # STARFRUIT cache stores price from 1 day ago, current day resp
         # by price, here we mean mid price
 
-        coef = [-0.01869561,  0.0455032 ,  0.16316049,  0.8090892]
+        coef = [-0.01869561, 0.0455032, 0.16316049, 0.8090892]
         intercept = 4.481696494462085
-        # coef = [0.34176867, 0.26106908, 0.20770677, 0.18898843]
-        # intercept = 2.3564943532555844
         nxt_price = intercept
         for i, val in enumerate(self.STARFRUIT_cache):
             nxt_price += val * coef[i]
@@ -88,15 +86,15 @@ class Trader:
         mx_with_buy = -1
 
         for ask, vol in osell.items():
-            if ((ask < acc_bid) or ((self.position[product]<0) and (ask == acc_bid))) and cpos < self.POSITION_LIMIT['AMETHYSTS']:
+            if ((ask < acc_bid) or ((self.position[product] < 0) and (ask == acc_bid))) and cpos < self.POSITION_LIMIT['AMETHYSTS']:
                 mx_with_buy = max(mx_with_buy, ask)
                 order_for = min(-vol, self.POSITION_LIMIT['AMETHYSTS'] - cpos)
                 cpos += order_for
                 assert(order_for >= 0)
                 orders.append(Order(product, ask, order_for))
 
-        mprice_actual = (best_sell_pr + best_buy_pr)/2
-        mprice_ours = (acc_bid + acc_ask)/2
+        mprice_actual = (best_sell_pr + best_buy_pr) / 2
+        mprice_ours = (acc_bid + acc_ask) / 2
 
         undercut_buy = best_buy_pr + 1
         undercut_sell = best_sell_pr - 1
