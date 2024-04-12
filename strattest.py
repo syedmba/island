@@ -184,7 +184,7 @@ class Trader:
         start_trading = 2100
         position_limit = 20
         current_position = state.position.get("STARFRUIT", 0)
-        history_length = 10
+        history_length = 30
         spread = 3
         
         print("price_history_starfruit:", price_history_starfruit)
@@ -201,7 +201,7 @@ class Trader:
         if len(price_history_starfruit) >= history_length+1:
             price_history_starfruit = price_history_starfruit[1:]
         
-        rate = 20
+        rate = 10
         m = 2 # of std devs
             
         if state.timestamp >= start_trading:
@@ -212,43 +212,43 @@ class Trader:
             print(df_starfruit_prices)
             # sma = self.get_sma(df_starfruit_prices['mid_price'], rate).to_numpy()
             sma = pd.DataFrame(columns=['means'])
-            sma = df_starfruit_prices['mid_price'].rolling(rate).mean()
+            sma = df_starfruit_prices['mid_price'].rolling(rate).mean().to_numpy()
             # std = self.get_std(df_starfruit_prices['mid_price'], rate).to_numpy()
-            std = pd.DataFrame(columns='stds')
-            std = df_starfruit_prices['mid_price'].rolling(rate).std()
+            std = pd.DataFrame(columns=['stds'])
+            std = df_starfruit_prices['mid_price'].rolling(rate).std().to_numpy()
             print("AaAAAAAAAAAA")
-            print(sma, std)
+            # print(sma, std)
 
-            upper_curr = sma[-1] #+ m * df_starfruit_prices['stds']
-            upper_prev = sma[-2] #+ m * df_starfruit_prices['stds']
-            lower_curr = sma[-1] # - m * df_starfruit_prices['stds']
-            lower_prev = sma[-2] # - m * df_starfruit_prices['stds']
+            upper_curr = sma[-1] + m * std[-1]
+            upper_prev = sma[-2] + m * std[-2]
+            lower_curr = sma[-1] - m * std[-1]
+            lower_prev = sma[-2] - m * std[-2]
             print(lower_prev)
 
             # holder = price_history_starfruit[-2]
             print(price_history_starfruit)
             print(price_history_starfruit[-2])
 
-            # if len(order_depth.sell_orders) > 0:
+            if len(order_depth.sell_orders) > 0:
 
-            #     best_ask = min(order_depth.sell_orders.keys())
-            #     best_ask_volume = order_depth.sell_orders[best_ask]
-            #     print(price_history_starfruit)
-            #     if price_history_starfruit[-2] > lower_prev:
-            #         if best_ask <= lower_curr:
-            #             if np.abs(best_ask_volume) > 0:
-            #                 print("BUY", "STARFRUIT", str(-best_ask_volume) + "x", best_ask)
-            #                 orders.append(Order("STARFRUIT", best_ask, -best_ask_volume))
+                best_ask = min(order_depth.sell_orders.keys())
+                best_ask_volume = order_depth.sell_orders[best_ask]
+                print(price_history_starfruit)
+                if price_history_starfruit[-2] > lower_prev:
+                    if best_ask <= lower_curr:
+                        if np.abs(best_ask_volume) > 0:
+                            print("BUY", "STARFRUIT", str(-best_ask_volume) + "x", best_ask)
+                            orders.append(Order("STARFRUIT", best_ask, -best_ask_volume))
 
-            # if len(order_depth.buy_orders) != 0:
-            #     best_bid = max(order_depth.buy_orders.keys())
-            #     best_bid_volume = order_depth.buy_orders[best_bid]
+            if len(order_depth.buy_orders) != 0:
+                best_bid = max(order_depth.buy_orders.keys())
+                best_bid_volume = order_depth.buy_orders[best_bid]
                 
-            #     if price_history_starfruit[-2] < upper_prev:
-            #         if best_bid >= upper_curr:
-            #             if best_bid_volume > 0:
-            #                 print("SELL", "STARFRUIT", str(best_bid_volume) + "x", best_bid)
-            #                 orders.append(Order("STARFRUIT", best_bid, -best_bid_volume))
+                if price_history_starfruit[-2] < upper_prev:
+                    if best_bid >= upper_curr:
+                        if best_bid_volume > 0:
+                            print("SELL", "STARFRUIT", str(best_bid_volume) + "x", best_bid)
+                            orders.append(Order("STARFRUIT", best_bid, -best_bid_volume))
 
         return orders, price_history_starfruit
 
