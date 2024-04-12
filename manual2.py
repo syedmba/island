@@ -15,8 +15,9 @@ per4 = list(itertools.permutations([1, 2, 0, 0]))
 per5 = list(itertools.permutations([1, 1, 2, 2]))
 per6 = list(itertools.permutations([2, 2, 0, 0]))
 per7 = list(itertools.permutations([1, 1, 0, 0]))
+per8 = list(itertools.permutations([0, 0, 1, 3]))
 # perlist = [permutations, per2, per3, per4, per5, per6, per7]
-perlist = [per7]
+perlist = [per8]
 # per3 = list(itertools.permutations([0, 1, 2, 3]))
 
 
