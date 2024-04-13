@@ -46,11 +46,6 @@ class Trader:
     begin_dip_price = -INF
 
     def calc_next_price_STARFRUIT(self):
-        # STARFRUIT cache stores price from 1 day ago, current day resp
-        # by price, here we mean mid price
-
-        # coef = [-0.01869561, 0.0455032, 0.16316049, 0.8090892]
-        # intercept = 4.481696494462085
         coef = [0.39374153, 0.32139952, 0.28181973]
         intercept = 15.361666971302839
         nxt_price = intercept
