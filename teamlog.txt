@@ -35,5 +35,9 @@ Sat, 13 Apr
 
 - Production falls => Demand Increases?
 - Is the exact relation of the supply-demand a factor?
+- What if we use linear regression on humidity and sunlight
+- Thoughts: WHAT IF sunlight and humidity and sunlight are either negatively or positively correlated
+            and we can find out which one by looking at the values
+            and subsequently use regression or other price prediction
 
 
