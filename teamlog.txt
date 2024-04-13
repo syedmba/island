@@ -16,5 +16,14 @@ Tue, 9 Apr
 - solved probability distribution to get E(R1) = 967 and E(R2) = 985.05
 - hence low bid = 967 and high bid = 985
 
-Wed, 10 Apr
-- 
+Fri, 12 Apr
+- Algo implemented using linear regression on 3 coefficients for starfruit and market-making for amethysts
+- Round 1 algo: 32,368 seashells
+- Round 1 manual: 94,437 seashells
+
+Sat, 13 Apr
+- Round 2
+- Current optimal solution for manual is seashells >> pizza >> wasabi >> seashells >> pizza >> seashells 
+- Trade multiplier of 1.0569693888 = 1.41 * 0.48 * 1.56 * 1.41 * 0.71
+- NOTE: value is 1.0569693887999998 with seashells >> pizza >> seashells >> pizza >> wasabi >> seashells
+
