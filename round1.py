@@ -233,8 +233,6 @@ class Trader:
         AMETHYSTS_lb = 10000
         AMETHYSTS_ub = 10000
 
-        # CHANGE FROM HERE
-
         acc_bid = {'AMETHYSTS' : AMETHYSTS_lb, 'STARFRUIT' : STARFRUIT_lb} # we want to buy at slightly below
         acc_ask = {'AMETHYSTS' : AMETHYSTS_ub, 'STARFRUIT' : STARFRUIT_ub} # we want to sell at slightly above
 
@@ -248,8 +246,6 @@ class Trader:
 
         totpnl = 0
 
-        print(f"Timestamp {timestamp}, Total PNL ended up being {totpnl}")
-        # print(f'Will trade {result}')
         print("End transmission")
         print(result)
         traderData = "NameError" # String value holding Trader state data required. It will be delivered as TradingState.traderData on next execution.

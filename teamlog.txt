@@ -20,6 +20,7 @@ Fri, 12 Apr
 - Algo implemented using linear regression on 3 coefficients for starfruit and market-making for amethysts
 - Round 1 algo: 32,368 seashells
 - Round 1 manual: 94,437 seashells
+- Position: 466 overall, 158 algo, 1421 manual
 
 Sat, 13 Apr
 - Round 2

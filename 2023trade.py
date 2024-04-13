@@ -208,7 +208,7 @@ class Trader:
 
         return orders
     
-    # def compute_orders_c_and_pc(self, order_depth):
+    def compute_orders_c_and_pc(self, order_depth):
         orders = {'COCONUTS' : [], 'PINA_COLADAS' : []}
         prods = ['COCONUTS', 'PINA_COLADAS']
         coef = 1.875
@@ -266,7 +266,7 @@ class Trader:
 
         return orders
     
-    # def compute_orders_basket(self, order_depth):
+    def compute_orders_basket(self, order_depth):
 
         orders = {'DIP' : [], 'BAGUETTE': [], 'UKULELE' : [], 'PICNIC_BASKET' : []}
         prods = ['DIP', 'BAGUETTE', 'UKULELE', 'PICNIC_BASKET']
@@ -351,7 +351,7 @@ class Trader:
 
         return orders
     
-    # def compute_orders_dg(self, order_depth, observations):
+    def compute_orders_dg(self, order_depth, observations):
         orders = {'DIVING_GEAR' : []}
         prods = ['DIVING_GEAR']
         osell, obuy, best_sell, best_buy, worst_sell, worst_buy, mid_price, vol_buy, vol_sell = {}, {}, {}, {}, {}, {}, {}, {}, {}
@@ -394,7 +394,7 @@ class Trader:
 
         return orders
     
-    # def compute_orders_br(self, order_depth, timestamp):
+    def compute_orders_br(self, order_depth, timestamp):
         orders = {'BERRIES' : []}
         prods = ['BERRIES']
         osell, obuy, best_sell, best_buy, worst_sell, worst_buy, mid_price, vol_buy, vol_sell = {}, {}, {}, {}, {}, {}, {}, {}, {}
