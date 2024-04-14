@@ -169,7 +169,7 @@ class Trader:
         cpos = self.position[product]
 
         for ask, vol in osell.items():
-            if ((ask <= acc_bid) or ((self.position[product]<0) and (ask == acc_bid+1))) and cpos < LIMIT:
+            if ((ask <= acc_bid) or ((self.position[product] < 0) and (ask == acc_bid + 1))) and cpos < LIMIT:
                 order_for = min(-vol, LIMIT - cpos)
                 cpos += order_for
                 assert(order_for >= 0)
@@ -309,20 +309,8 @@ class Trader:
 
         # parsing orchids data from OrderDepth and TradingState
 
-        if len(self.orchids_cache) == self.orchids_dim:
-            self.orchids_cache.pop(0)
-
-        _, bs_orchids = self.values_extract(collections.OrderedDict(sorted(state.order_depths['ORCHIDS'].sell_orders.items())))
-        _, bb_orchids = self.values_extract(collections.OrderedDict(sorted(state.order_depths['ORCHIDS'].buy_orders.items(), reverse=True)), 1)
-
-        self.orchids_cache.append((bs_orchids + bb_orchids) / 2)
-
         orchids_lb = -INF
         orchids_ub = -INF
-
-        if len(self.orchids_cache) == self.orchids_dim:
-            orchids_lb = self.calc_next_price_orchids(sunlight, humidity) - 1
-            orchids_ub = self.calc_next_price_orchids(sunlight, humidity) + 1
 
         # price bounds for all products
 
