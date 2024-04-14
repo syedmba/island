@@ -29,6 +29,14 @@ class Trader:
     STARFRUIT_cache = []
     STARFRUIT_dim = 3
     
+    buy_orchids = False
+    sell_orchids = False
+    close_orchids = False
+    # last_dg_price = 0
+    start_orchids = 0
+    first_orchids = 0
+
+    #check use
     orchids_cache = []
     orchids_dim = 3
 
@@ -47,6 +55,73 @@ class Trader:
     begin_diff_bag = -INF
     begin_bag_price = -INF
     begin_dip_price = -INF
+
+    def compute_orchids(self, observations, order_depth, timestamp):
+        orders = {'ORCHIDS' : []}
+        prods = ['ORCHIDS']
+
+        # check variables
+        osell, obuy, best_sell, best_buy, worst_sell, worst_buy, mid_price, vol_buy, vol_sell = {}, {}, {}, {}, {}, {}, {}, {}, {}
+       
+        for p in prods:
+            osell[p] = collections.OrderedDict(sorted(order_depth[p].sell_orders.items()))
+            obuy[p] = collections.OrderedDict(sorted(order_depth[p].buy_orders.items(), reverse=True))
+
+            best_sell[p] = next(iter(osell[p]))
+            best_buy[p] = next(iter(obuy[p]))
+
+            worst_sell[p] = next(reversed(osell[p]))
+            worst_buy[p] = next(reversed(obuy[p]))
+
+            mid_price[p] = (best_sell[p] + best_buy[p])/2
+            vol_buy[p], vol_sell[p] = 0, 0
+            for price, vol in obuy[p].items():
+                vol_buy[p] += vol 
+            for price, vol in osell[p].items():
+                vol_sell[p] += -vol 
+
+        if timestamp == 0:
+            self.start_orchids = mid_price['ORCHIDS']
+        if timestamp == 350*1000:
+            self.first_orchids = mid_price['ORCHIDS']
+            self.buy_orchids = True
+        if timestamp == 500*1000:
+            self.sell_orchids = True
+        if timestamp == 750*1000: 
+            if self.first_orchids != 0 and self.start_orchids != 0 and self.first_orchids > self.start_orchids:
+                self.buy_orchids = True
+            elif self.first_orchids == 0 or self.start_orchids == 0:
+                self.close_orchids = True
+
+        if int(round(self.person_position['Olivia']['ORCHIDS'])) > 0:
+            self.buy_orchids = True
+            self.sell_orchids = False
+        if int(round(self.person_position['Olivia']['ORCHIDS'])) < 0:
+            self.sell_orchids = True
+            self.buy_orchids = False
+
+        if self.buy_orchids and self.position['ORCHIDS'] == self.POSITION_LIMIT['ORCHIDS']:
+            self.buy_orchids = False
+        if self.sell_orchids and self.position['ORCHIDS'] == -self.POSITION_LIMIT['ORCHIDS']:
+            self.sell_orchids = False
+        if self.close_orchids and self.position['ORCHIDS'] == 0:
+            self.close_orchids = False
+
+        if self.buy_orchids:
+            vol = self.POSITION_LIMIT['ORCHIDS'] - self.position['ORCHIDS']
+            orders['ORCHIDS'].append(Order('ORCHIDS', best_sell['ORCHIDS'], vol))
+        if self.sell_orchids:
+            vol = self.position['ORCHIDS'] + self.POSITION_LIMIT['ORCHIDS']
+            orders['ORCHIDS'].append(Order('ORCHIDS', best_buy['ORCHIDS'], -vol))
+        if self.close_orchids:
+            vol = -self.position['ORCHIDS']
+            if vol < 0:
+                orders['ORCHIDS'].append(Order('ORCHIDS', best_buy['ORCHIDS'], vol)) 
+            else:
+                orders['ORCHIDS'].append(Order('ORCHIDS', best_sell['ORCHIDS'], vol)) 
+        return orders
+
+
 
     def calc_next_price_STARFRUIT(self):
         coef = [0.39374153, 0.32139952, 0.28181973]

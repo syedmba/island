@@ -22,9 +22,22 @@ Fri, 12 Apr
 - Round 1 manual: 94,437 seashells
 - Position: 466 overall, 158 algo, 1421 manual
 
-Sat, 13 Apr
 - Round 2
 - Current optimal solution for manual is seashells >> pizza >> wasabi >> seashells >> pizza >> seashells 
 - Trade multiplier of 1.0569693888 = 1.41 * 0.48 * 1.56 * 1.41 * 0.71
 - NOTE: value is 1.0569693887999998 with seashells >> pizza >> seashells >> pizza >> wasabi >> seashells
+
+Sat, 13 Apr
+- If the sunlight exposure is less than 7 hours a day, production will decrease with 4% for every ten minutes.
+- Ideal humidity for orchids to grow is between 60% and 80%. Outside those limits, productions will fall with 2% for every 5% point of humidity change
+- Shipping costs and import and export tariffs
+- Storage is at 0.1 seashell per orchid per timestamp
+
+- Production falls => Demand Increases?
+- Is the exact relation of the supply-demand a factor?
+- What if we use linear regression on humidity and sunlight
+- Thoughts: WHAT IF sunlight and humidity and sunlight are either negatively or positively correlated
+            and we can find out which one by looking at the values
+            and subsequently use regression or other price prediction
+
 
