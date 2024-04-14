@@ -134,8 +134,9 @@ class Trader:
 
     def calc_next_price_orchids(self, sunlight, humidity):
         # -0.0024122, -0.12234782, 
-        coef = [0.81719917, 0.09297269, 0.07895589]
-        intercept = 11.775448479708984
+        # coef = [0.81719917, 0.09297269, 0.07895589]
+        coef = [-0.04993152 -2.9182827 ] #muhammad added
+        intercept = 1408.156894273624
         nxt_price = intercept
         # + (coef[0] * sunlight) + (coef[1] * humidity)
         for i, val in enumerate(self.STARFRUIT_cache):
@@ -386,6 +387,8 @@ class Trader:
 
         orchids_lb = -INF
         orchids_ub = -INF
+
+        
 
         # price bounds for all products
 
