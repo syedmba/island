@@ -283,54 +283,91 @@ class Trader:
 
     def compute_orders_orchids(self, observations, product, order_depth, acc_bid, acc_ask, LIMIT):
         orders: list[Order] = []
+        with_south = False # whether to trade with south island or not
+        # south island info
+        south_island = observations.conversionObservations["ORCHIDS"]
+        south_bid = south_island.bidPrice
+        south_ask = south_island.askPrice
+        south_transport_fees = south_island.transportFees
+        south_export_tariff = south_island.exportTariff
+        south_import_tariff = south_island.importTariff
+        south_sunlight = south_island.sunlight
+        south_humidity = south_island.humidity
+
+        # net cost of buying from south island
+        south_buy_cost = south_ask + south_transport_fees + south_import_tariff
+        # net value from selling to south island
+        south_sell_value = south_bid - south_transport_fees - south_export_tariff
 
         # sort sell orders in ascending order of price (lowest first)
         osell = collections.OrderedDict(sorted(order_depth.sell_orders.items()))
         # sort buy orders in descending order of price (highest first)
         obuy = collections.OrderedDict(sorted(order_depth.buy_orders.items(), reverse=True))
 
-        # get south island information
-
         sell_vol, best_sell_pr = self.values_extract(osell)
         buy_vol, best_buy_pr = self.values_extract(obuy, 1)
 
-        cpos = self.position[product]
+        # if buying from south island is better than trading on exchange
+        if south_buy_cost < best_buy_pr:
+            print("buying from south")
+            with_south = True
+            cpos = self.position[product]
+            if cpos < LIMIT:
+                vol = LIMIT - cpos
+                cpos += vol
+                assert(vol >= 0)
+                orders.append(Order(product, south_ask, vol))
+        # if selling to south island is better than trading on exchange
+        if south_sell_value > best_sell_pr:
+            print("selling to south")
+            with_south = True
+            cpos = self.position[product]
+            if cpos > -LIMIT:
+                vol = -LIMIT - cpos
+                cpos += vol
+                assert(vol <= 0)
+                orders.append(Order(product, south_bid, vol))
 
-        for ask, vol in osell.items():
-            if ((ask <= acc_bid) or ((self.position[product] < 0) and (ask == acc_bid + 1))) and cpos < LIMIT:
-                order_for = min(-vol, LIMIT - cpos)
-                cpos += order_for
-                assert(order_for >= 0)
-                orders.append(Order(product, ask, order_for))
+        if with_south is False:
+            print("trading with self exchange")
+            cpos = self.position[product]
 
-        undercut_buy = best_buy_pr + 1
-        undercut_sell = best_sell_pr - 1
+            # to find buying opportunity in own exchange    
+            for ask, vol in osell.items():
+                if ((ask <= acc_bid) or ((self.position[product] < 0) and (ask == acc_bid + 1))) and cpos < LIMIT:
+                    order_for = min(-vol, LIMIT - cpos)
+                    cpos += order_for
+                    assert(order_for >= 0)
+                    orders.append(Order(product, ask, order_for))
 
-        bid_pr = min(undercut_buy, acc_bid) # we will shift this by 1 to beat this price
-        sell_pr = max(undercut_sell, acc_ask)
+            undercut_buy = best_buy_pr + 1
+            undercut_sell = best_sell_pr - 1
 
-        if cpos < LIMIT:
-            num = LIMIT - cpos
-            orders.append(Order(product, bid_pr, num))
-            cpos += num
-        
-        cpos = self.position[product]
-        
+            bid_pr = min(undercut_buy, acc_bid) # we will shift this by 1 to beat this price
+            sell_pr = max(undercut_sell, acc_ask)
 
-        for bid, vol in obuy.items():
-            if ((bid >= acc_ask) or ((self.position[product] > 0) and (bid + 1 == acc_ask))) and cpos > -LIMIT:
-                order_for = max(-vol, -LIMIT - cpos)
-                # order_for is a negative number denoting how much we will sell
-                cpos += order_for
-                assert(order_for <= 0)
-                orders.append(Order(product, bid, order_for))
+            if cpos < LIMIT:
+                num = LIMIT - cpos
+                orders.append(Order(product, bid_pr, num))
+                cpos += num
+            
+            cpos = self.position[product]
+            
+            # to find selling opportunity in own exchange
+            for bid, vol in obuy.items():
+                if ((bid >= acc_ask) or ((self.position[product] > 0) and (bid + 1 == acc_ask))) and cpos > -LIMIT:
+                    order_for = max(-vol, -LIMIT - cpos)
+                    # order_for is a negative number denoting how much we will sell
+                    cpos += order_for
+                    assert(order_for <= 0)
+                    orders.append(Order(product, bid, order_for))
 
-        if cpos > -LIMIT:
-            num = -LIMIT - cpos
-            orders.append(Order(product, sell_pr, num))
-            cpos += num
+            if cpos > -LIMIT:
+                num = -LIMIT - cpos
+                orders.append(Order(product, sell_pr, num))
+                cpos += num
 
-        return orders
+        return with_south, orders
     
 
     def compute_orders(self, product, order_depth, acc_bid, acc_ask, observations):
@@ -344,8 +381,6 @@ class Trader:
         
         
     def run(self, state: TradingState) -> Dict[str, List[Order]]:
-        print("Observation:", state.observations)
-
         # Initialize the method output dict as an empty dict
 
         result = {'AMETHYSTS' : [], 'STARFRUIT' : [], 'ORCHIDS' : []}
@@ -355,6 +390,8 @@ class Trader:
         timestamp = state.timestamp
         INF = 1e9
         observations = state.observations
+        depths = state.order_depths
+        conversions = 0
 
         # Iterate over all the keys (the available products) contained in the order depths
 
@@ -383,12 +420,30 @@ class Trader:
             STARFRUIT_lb = self.calc_next_price_STARFRUIT() - 1
             STARFRUIT_ub = self.calc_next_price_STARFRUIT() + 1
 
-        # parsing orchids data from OrderDepth and TradingState
+        # parsing orchids data from OrderDepth and TradingState to implement VWAP
 
         orchids_lb = -INF
-        orchids_ub = -INF
+        orchids_ub = INF
 
-        
+        orchid_buys = depths['ORCHIDS'].buy_orders # dict of price:volume
+        orchid_sells = depths['ORCHIDS'].sell_orders # dict of price:volume
+        # orchid_market_trades = state.market_trades['ORCHIDS'] # list of Trade objects
+
+        b, s, b_vol, s_vol = 0, 0, 0, 0
+
+        for price, vol in orchid_buys.items():
+            b += (price * vol)
+            b_vol += vol
+
+        orchids_lb = b / b_vol
+        print(f"orchids buy price: {orchids_lb} for order_book: {orchid_buys}")
+
+        for price, vol in orchid_sells.items():
+            s += (price * vol)
+            s_vol += vol
+
+        orchids_ub = s / s_vol
+        print(f"orchids sell price: {orchids_ub} for order_book: {orchid_sells}")
 
         # price bounds for all products
 
@@ -401,9 +456,14 @@ class Trader:
 
         # compute orders for all products
 
-        for product in ['AMETHYSTS', 'STARFRUIT']: #, 'ORCHIDS':
+        for product in ['AMETHYSTS', 'STARFRUIT', 'ORCHIDS']:
             order_depth: OrderDepth = state.order_depths[product]
-            orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product], observations)
+            if product == "ORCHIDS":
+                south, orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product], observations)
+                if south is True:
+                    conversions += 1
+            else:
+                orders = self.compute_orders(product, order_depth, acc_bid[product], acc_ask[product], observations)
             result[product] += orders
 
         # Send final orders
@@ -412,6 +472,5 @@ class Trader:
         print()
         # String value holding TraderState data required. It will be delivered as TradingState.traderData on next execution.
         traderData = "NameError"
-        conversions = 0
 
         return result, conversions, traderData
