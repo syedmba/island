@@ -161,7 +161,7 @@ class Trader:
         # predicting next humidity can help predict quickly incoming price changes
         next_sunlight = self.calc_next_SUNLIGHT()
         next_humidity = self.calc_next_HUMIDITY()
-        if next_sunlight <= 
+        # if next_sunlight <= 
 
     def values_extract(self, order_dict, buy=0):
         tot_vol = 0
