@@ -307,31 +307,24 @@ class Trader:
         sell_vol, best_sell_pr = self.values_extract(osell)
         buy_vol, best_buy_pr = self.values_extract(obuy, 1)
 
-        # if buying from south island is better than trading on exchange
+        # find profitable trade on south island
+        # cases in which we trade:
+        # 1) if someone is selling for cheaper on south and buying for more here
+        # 2) if someone is buying for more in south and selling for less here
+        # 3) if someone is buying for more here and we can sell directly here
+        # 4) if someone is selling for less here and we can buy directly here
+
+        # buying logic (buy from wherever it is cheaper)
         if south_buy_cost < best_buy_pr:
-            print("buying from south")
-            with_south = True
             cpos = self.position[product]
+            # to buy from south
             if cpos < LIMIT:
+                with_south = True
+                print("trading with south")
                 vol = LIMIT - cpos
-                cpos += vol
-                assert(vol >= 0)
-                orders.append(Order(product, south_ask, vol))
-        # if selling to south island is better than trading on exchange
-        if south_sell_value > best_sell_pr:
-            print("selling to south")
-            with_south = True
+                orders.append(Order(product, int(south_ask), vol))
+        elif south_buy_cost >= best_buy_pr:
             cpos = self.position[product]
-            if cpos > -LIMIT:
-                vol = -LIMIT - cpos
-                cpos += vol
-                assert(vol <= 0)
-                orders.append(Order(product, south_bid, vol))
-
-        if with_south is False:
-            print("trading with self exchange")
-            cpos = self.position[product]
-
             # to find buying opportunity in own exchange    
             for ask, vol in osell.items():
                 if ((ask <= acc_bid) or ((self.position[product] < 0) and (ask == acc_bid + 1))) and cpos < LIMIT:
@@ -340,19 +333,17 @@ class Trader:
                     assert(order_for >= 0)
                     orders.append(Order(product, ask, order_for))
 
-            undercut_buy = best_buy_pr + 1
-            undercut_sell = best_sell_pr - 1
-
-            bid_pr = min(undercut_buy, acc_bid) # we will shift this by 1 to beat this price
-            sell_pr = max(undercut_sell, acc_ask)
-
-            if cpos < LIMIT:
-                num = LIMIT - cpos
-                orders.append(Order(product, bid_pr, num))
-                cpos += num
-            
+        # selling logic (sell wherever it is higher)
+        if south_sell_value > best_sell_pr:
             cpos = self.position[product]
-            
+            # to sell to south
+            if cpos > -LIMIT:
+                print("trading with south")
+                with_south = True
+                vol = -LIMIT - cpos
+                orders.append(Order(product, int(south_bid), vol))
+        elif south_sell_value <= best_sell_pr:
+            cpos = self.position[product]
             # to find selling opportunity in own exchange
             for bid, vol in obuy.items():
                 if ((bid >= acc_ask) or ((self.position[product] > 0) and (bid + 1 == acc_ask))) and cpos > -LIMIT:
@@ -362,10 +353,71 @@ class Trader:
                     assert(order_for <= 0)
                     orders.append(Order(product, bid, order_for))
 
-            if cpos > -LIMIT:
-                num = -LIMIT - cpos
-                orders.append(Order(product, sell_pr, num))
-                cpos += num
+        # arbitrage
+
+        # buy from south and sell here
+        
+
+
+        # if buying from south island is better than trading on exchange
+        # if south_buy_cost < best_buy_pr:
+        #     print("buying from south")
+        #     with_south = True
+        #     cpos = self.position[product]
+        #     if cpos < LIMIT:
+        #         vol = LIMIT - cpos
+        #         cpos += vol
+        #         assert(vol >= 0)
+        #         orders.append(Order(product, south_ask, vol))
+        # # if selling to south island is better than trading on exchange
+        # if south_sell_value > best_sell_pr:
+        #     print("selling to south")
+        #     with_south = True
+        #     cpos = self.position[product]
+        #     if cpos > -LIMIT:
+        #         vol = -LIMIT - cpos
+        #         cpos += vol
+        #         assert(vol <= 0)
+        #         orders.append(Order(product, south_bid, vol))
+
+        # if with_south is False:
+        #     print("trading with self exchange")
+        #     cpos = self.position[product]
+
+        #     # to find buying opportunity in own exchange    
+        #     for ask, vol in osell.items():
+        #         if ((ask <= acc_bid) or ((self.position[product] < 0) and (ask == acc_bid + 1))) and cpos < LIMIT:
+        #             order_for = min(-vol, LIMIT - cpos)
+        #             cpos += order_for
+        #             assert(order_for >= 0)
+        #             orders.append(Order(product, ask, order_for))
+
+        #     undercut_buy = best_buy_pr + 1
+        #     undercut_sell = best_sell_pr - 1
+
+        #     bid_pr = min(undercut_buy, acc_bid) # we will shift this by 1 to beat this price
+        #     sell_pr = max(undercut_sell, acc_ask)
+
+        #     if cpos < LIMIT:
+        #         num = LIMIT - cpos
+        #         orders.append(Order(product, bid_pr, num))
+        #         cpos += num
+            
+        #     cpos = self.position[product]
+            
+        #     # to find selling opportunity in own exchange
+        #     for bid, vol in obuy.items():
+        #         if ((bid >= acc_ask) or ((self.position[product] > 0) and (bid + 1 == acc_ask))) and cpos > -LIMIT:
+        #             order_for = max(-vol, -LIMIT - cpos)
+        #             # order_for is a negative number denoting how much we will sell
+        #             cpos += order_for
+        #             assert(order_for <= 0)
+        #             orders.append(Order(product, bid, order_for))
+
+        #     if cpos > -LIMIT:
+        #         num = -LIMIT - cpos
+        #         orders.append(Order(product, sell_pr, num))
+        #         cpos += num
 
         return with_south, orders
     
