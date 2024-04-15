@@ -56,6 +56,8 @@ class Trader:
     begin_bag_price = -INF
     begin_dip_price = -INF
 
+    sunlight_until_now = 0
+
     def compute_orchids(self, observations, order_depth, timestamp):
         orders = {'ORCHIDS' : []}
         prods = ['ORCHIDS']
@@ -412,6 +414,9 @@ class Trader:
         observations = state.observations
         depths = state.order_depths
         conversions = 0
+
+        sunlight_until_now = observations.sunlight
+
 
         # Iterate over all the keys (the available products) contained in the order depths
 
