@@ -121,7 +121,28 @@ class Trader:
                 orders['ORCHIDS'].append(Order('ORCHIDS', best_sell['ORCHIDS'], vol)) 
         return orders
 
+    def calc_next_SUNLIGHT(self):
+        coef = [-0.00431689]
+        intercept = 2115.860341590197
+        # Accuracy: 0.9977412465378546    
+        nxt_price = intercept
+        for i, val in enumerate(self.SUNLIGHT_cache):
+            nxt_price += val * coef[i]
+        return int(round(nxt_price))
+    
+    def calc_next_HUMIDITY(self):
+        # Coefficients: [0.00013844]
+        # Intercept: 70.91250876799788
+        # Accuracy: 0.9957378372532794
+        coef = [0.00013844]
+        intercept = 70.91250876799788
+          
+        nxt_price = intercept
+        for i, val in enumerate(self.HUMIDITY_cache):
+            nxt_price += val * coef[i]
+        return int(round(nxt_price))
 
+    
 
     def calc_next_price_STARFRUIT(self):
         coef = [0.39374153, 0.32139952, 0.28181973]
@@ -133,16 +154,14 @@ class Trader:
         return int(round(nxt_price))
 
     def calc_next_price_orchids(self, sunlight, humidity):
-        # -0.0024122, -0.12234782, 
-        # coef = [0.81719917, 0.09297269, 0.07895589]
-        coef = [-0.04993152 -2.9182827 ] #muhammad added
-        intercept = 1408.156894273624
-        nxt_price = intercept
-        # + (coef[0] * sunlight) + (coef[1] * humidity)
-        for i, val in enumerate(self.STARFRUIT_cache):
-            nxt_price += val * coef[i]
+        hours_of_sunlight_until_now = 0 # need to increment this using sunlight values until present time
+        # then we predict sunlight later on and see if 7 hours benchmark will be surpassed or not
 
-        return int(round(nxt_price))
+        # for humidity it is straightforward
+        # predicting next humidity can help predict quickly incoming price changes
+        next_sunlight = self.calc_next_SUNLIGHT()
+        next_humidity = self.calc_next_HUMIDITY()
+        if next_sunlight <= 
 
     def values_extract(self, order_dict, buy=0):
         tot_vol = 0
@@ -369,6 +388,7 @@ class Trader:
 
         return with_south, orders
     
+
 
     def compute_orders(self, product, order_depth, acc_bid, acc_ask, observations):
 
