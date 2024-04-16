@@ -57,6 +57,7 @@ class Trader:
     begin_dip_price = -INF
 
     sunlight_until_now = 0
+    total_timestamps_hour = 10000/12 # timestamps for an hour on the SOUTH ISLAND !
 
     def compute_orchids(self, observations, order_depth, timestamp):
         orders = {'ORCHIDS' : []}
@@ -415,7 +416,9 @@ class Trader:
         depths = state.order_depths
         conversions = 0
 
-        sunlight_until_now = observations.sunlight
+        if timestamp <= 100:
+            self.sunlight_until_now = 0
+        self.sunlight_until_now += observations.conversionObservations["ORCHIDS"].sunlight * (1 / self.total_timestamps_hour)
 
 
         # Iterate over all the keys (the available products) contained in the order depths
