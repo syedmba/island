@@ -448,8 +448,8 @@ class Trader:
                 if vol_sell[p] >= self.POSITION_LIMIT[p]/10:
                     break
 
-        res_buy = mid_price['GIFT_BASKET'] - mid_price['CHOCOLATE']*4 - mid_price['STRAWBERRIES']*6 - mid_price['ROSE'] - 375
-        res_sell = mid_price['GIFT_BASKET'] - mid_price['CHOCOLATE']*4 - mid_price['STRAWBERRIES']*6 - mid_price['ROSE'] - 375
+        res_buy = mid_price['GIFT_BASKET'] - mid_price['CHOCOLATE']*4 - mid_price['STRAWBERRIES']*6 - mid_price['ROSE'] - 370
+        res_sell = mid_price['GIFT_BASKET'] - mid_price['CHOCOLATE']*4 - mid_price['STRAWBERRIES']*6 - mid_price['ROSE'] - 370
 
         trade_at = self.basket_std*0.5
         close_at = self.basket_std*(-1000)
