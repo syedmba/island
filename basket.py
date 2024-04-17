@@ -118,7 +118,7 @@ class Trader:
                 # stop_loss = 0.01
 
                 #if price_nav_ratio < self.basket_pnav_ratio - self.basket_eps:
-                if z_score_diff < -2:
+                if z_score_diff < -2.2:
                     # stop_loss_price = self.etf_returns[-2] 
 
 
@@ -129,6 +129,9 @@ class Trader:
                     chocolate_best_bid_vol =  state.order_depths['CHOCOLATE'].buy_orders[chocolate_best_bid]
                     strawberries_best_bid_vol = state.order_depths['STRAWBERRIES'].buy_orders[strawberries_best_bid]
                     roses_best_bid_vol = state.order_depths['ROSES'].buy_orders[roses_best_bid]
+
+                    # print("#"*100)
+                    # print(basket_best_ask_vol, chocolate_best_bid_vol, strawberries_best_bid_vol, roses_best_bid_vol)
 
                     limit_mult = min(-basket_best_ask_vol, roses_best_bid_vol, 
                                      round(chocolate_best_bid_vol / 4), round(strawberries_best_bid_vol / 6))
@@ -154,7 +157,7 @@ class Trader:
                     
                      
                 #elif price_nav_ratio > self.basket_pnav_ratio + self.basket_eps:
-                elif z_score_diff > 2:
+                elif z_score_diff > 2.2:
                     # ETF is overvalued! -> we sell ETF and buy individual assets!
                     # Finds volume to buy that is within position limit
                     #basket_best_bid_vol = min(self.basket_limit-basket_pos, state.order_depths['GIFT_BASKET'].buy_orders[basket_best_bid])
@@ -162,6 +165,9 @@ class Trader:
                     chocolate_best_ask_vol = state.order_depths['CHOCOLATE'].sell_orders[chocolate_best_ask]
                     strawberries_best_ask_vol = state.order_depths['STRAWBERRIES'].sell_orders[strawberries_best_ask]
                     roses_best_ask_vol = state.order_depths['ROSES'].sell_orders[roses_best_ask]
+
+                    # print("#"*100)
+                    # print(basket_best_bid_vol, chocolate_best_ask_vol, strawberries_best_ask_vol, roses_best_ask_vol)
 
                     limit_mult = min(basket_best_bid_vol, -roses_best_ask_vol, 
                                      round(-chocolate_best_ask_vol / 4), round(-strawberries_best_ask_vol / 6))
@@ -171,10 +177,9 @@ class Trader:
                     print("SELL", 'GIFT_BASKET', limit_mult, "x", basket_best_bid)
                     orders_gift_basket.append(Order('GIFT_BASKET', basket_best_bid, -limit_mult))
                     
-                    """
                     #chocolate_best_ask_vol = max(chocolate_pos-self.chocolate_limit, state.order_depths['CHOCOLATE'].sell_orders[chocolate_best_ask])
                     print("BUY", "CHOCOLATE", 4 * limit_mult, "x", chocolate_best_ask)
-                    orders_chocolate.append(Order("CHOCOLATE", chocolate_best_ask, 4 * limit_mult))
+                    orders_chocolate.append(Order("CHOCOLATE", chocolate_best_ask, 4 * limit_mult)) 
                     
                     #strawberries_best_ask_vol = max(strawberries_pos-self.strawberries_limit, state.order_depths['STRAWBERRIES'].sell_orders[strawberries_best_ask])
                     print("BUY", "STRAWBERRIES", 6 * limit_mult, "x", strawberries_best_ask)
@@ -183,7 +188,7 @@ class Trader:
                     #roses_best_ask_vol = max(roses_pos-self.roses_limit, state.order_depths['ROSES'].sell_orders[roses_best_ask])
                     print("BUY", "ROSES", limit_mult, "x", roses_best_ask)
                     orders_roses.append(Order("ROSES", roses_best_ask, limit_mult))
-                    """
+                    
 
                 result['GIFT_BASKET'] = orders_gift_basket
                 result['CHOCOLATE'] = orders_chocolate
