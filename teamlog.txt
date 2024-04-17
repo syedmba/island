@@ -41,3 +41,6 @@ Sat, 13 Apr
             and subsequently use regression or other price prediction
 
 
+Wed, 17 Apr
+- yt video for last year https://www.youtube.com/watch?v=ax6T6dhuxys
+- average basket premium is 370.2676267626763
