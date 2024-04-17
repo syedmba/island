@@ -7,7 +7,7 @@ import math
 import copy
 import numpy as np
 
-empty_dict = {'AMETHYSTS' : 0, 'STARFRUIT' : 0, 'ORCHIDS' : 0}
+empty_dict = {'AMETHYSTS' : 0, 'STARFRUIT' : 0, 'ORCHIDS' : 0, 'CHOCOLATE' : 0, 'STRAWBERRIES': 0, 'ROSE' : 0, 'GIFT_BASKET' : 0}
 
 
 def def_value():
@@ -18,7 +18,7 @@ INF = int(1e9)
 class Trader:
 
     position = copy.deepcopy(empty_dict)
-    POSITION_LIMIT = {'AMETHYSTS' : 20, 'STARFRUIT' : 20, 'ORCHIDS' : 100}
+    POSITION_LIMIT = {'AMETHYSTS' : 20, 'STARFRUIT' : 20, 'ORCHIDS' : 100, 'CHOCOLATE' : 250, 'STRAWBERRIES': 350, 'ROSE' : 60, 'GIFT_BASKET' : 60}
     volume_traded = copy.deepcopy(empty_dict)
 
     person_position = defaultdict(def_value)
@@ -47,6 +47,11 @@ class Trader:
     SUNLIGHT_dim = 50
 
     steps = 0
+
+    cont_buy_basket_unfill = 0
+    cont_sell_basket_unfill = 0
+    std = 25
+    basket_std = 117
     
     halflife_diff = 5
     alpha_diff = 1 - np.exp(-np.log(2)/halflife_diff)
@@ -54,13 +59,13 @@ class Trader:
     halflife_price = 5
     alpha_price = 1 - np.exp(-np.log(2)/halflife_price)
 
-    halflife_price_dip = 20
-    alpha_price_dip = 1 - np.exp(-np.log(2)/halflife_price_dip)
+    halflife_price_CHOCOLATE = 20
+    alpha_price_CHOCOLATE = 1 - np.exp(-np.log(2)/halflife_price_CHOCOLATE)
     
-    begin_diff_dip = -INF
+    begin_diff_CHOCOLATE = -INF
     begin_diff_bag = -INF
     begin_bag_price = -INF
-    begin_dip_price = -INF
+    begin_CHOCOLATE_price = -INF
 
     sunlight_until_now = 0
     total_timestamps_hour = 10000/12 # timestamps for an hour on the SOUTH ISLAND !
@@ -416,7 +421,90 @@ class Trader:
 
         return with_south, orders
     
+    def compute_orders_basket(self, order_depth):
+        
+        orders = {'CHOCOLATE' : [], 'STRAWBERRIES': [], 'ROSE' : [], 'GIFT_BASKET' : []}
+        prods = ['CHOCOLATE', 'STRAWBERRIES', 'ROSE', 'GIFT_BASKET']
+        osell, obuy, best_sell, best_buy, worst_sell, worst_buy, mid_price, vol_buy, vol_sell = {}, {}, {}, {}, {}, {}, {}, {}, {}
 
+        for p in prods:
+            osell[p] = collections.OrderedDict(sorted(order_depth[p].sell_orders.items()))
+            obuy[p] = collections.OrderedDict(sorted(order_depth[p].buy_orders.items(), reverse=True))
+
+            best_sell[p] = next(iter(osell[p]))
+            best_buy[p] = next(iter(obuy[p]))
+
+            worst_sell[p] = next(reversed(osell[p]))
+            worst_buy[p] = next(reversed(obuy[p]))
+
+            mid_price[p] = (best_sell[p] + best_buy[p])/2
+            vol_buy[p], vol_sell[p] = 0, 0
+            for price, vol in obuy[p].items():
+                vol_buy[p] += vol 
+                if vol_buy[p] >= self.POSITION_LIMIT[p]/10:
+                    break
+            for price, vol in osell[p].items():
+                vol_sell[p] += -vol 
+                if vol_sell[p] >= self.POSITION_LIMIT[p]/10:
+                    break
+
+        res_buy = mid_price['GIFT_BASKET'] - mid_price['CHOCOLATE']*4 - mid_price['STRAWBERRIES']*6 - mid_price['ROSE'] - 375
+        res_sell = mid_price['GIFT_BASKET'] - mid_price['CHOCOLATE']*4 - mid_price['STRAWBERRIES']*6 - mid_price['ROSE'] - 375
+
+        trade_at = self.basket_std*0.5
+        close_at = self.basket_std*(-1000)
+
+        pb_pos = self.position['GIFT_BASKET']
+        pb_neg = self.position['GIFT_BASKET']
+
+        uku_pos = self.position['ROSE']
+        uku_neg = self.position['ROSE']
+
+
+        basket_buy_sig = 0
+        basket_sell_sig = 0
+
+        if self.position['GIFT_BASKET'] == self.POSITION_LIMIT['GIFT_BASKET']:
+            self.cont_buy_basket_unfill = 0
+        if self.position['GIFT_BASKET'] == -self.POSITION_LIMIT['GIFT_BASKET']:
+            self.cont_sell_basket_unfill = 0
+
+        do_bask = 0
+
+        if res_sell > trade_at:
+            vol = self.position['GIFT_BASKET'] + self.POSITION_LIMIT['GIFT_BASKET']
+            self.cont_buy_basket_unfill = 0 # no need to buy rn
+            assert(vol >= 0)
+            if vol > 0:
+                do_bask = 1
+                basket_sell_sig = 1
+                orders['GIFT_BASKET'].append(Order('GIFT_BASKET', worst_buy['GIFT_BASKET'], -vol)) 
+                self.cont_sell_basket_unfill += 2
+                pb_neg -= vol
+                #uku_pos += vol
+        elif res_buy < -trade_at:
+            vol = self.POSITION_LIMIT['GIFT_BASKET'] - self.position['GIFT_BASKET']
+            self.cont_sell_basket_unfill = 0 # no need to sell rn
+            assert(vol >= 0)
+            if vol > 0:
+                do_bask = 1
+                basket_buy_sig = 1
+                orders['GIFT_BASKET'].append(Order('GIFT_BASKET', worst_sell['GIFT_BASKET'], vol))
+                self.cont_buy_basket_unfill += 2
+                pb_pos += vol
+
+        if int(round(self.person_position['Olivia']['ROSE'])) > 0:
+
+            val_ord = self.POSITION_LIMIT['ROSE'] - uku_pos
+            if val_ord > 0:
+                orders['ROSE'].append(Order('ROSE', worst_sell['ROSE'], val_ord))
+        if int(round(self.person_position['Olivia']['ROSE'])) < 0:
+
+            val_ord = -(self.POSITION_LIMIT['ROSE'] + uku_neg)
+            if val_ord < 0:
+                orders['ROSE'].append(Order('ROSE', worst_buy['ROSE'], val_ord))
+
+        return orders
 
     def compute_orders(self, product, order_depth, acc_bid, acc_ask, observations):
 
@@ -431,7 +519,7 @@ class Trader:
     def run(self, state: TradingState) -> Dict[str, List[Order]]:
         # Initialize the method output dict as an empty dict
 
-        result = {'AMETHYSTS' : [], 'STARFRUIT' : [], 'ORCHIDS' : []}
+        result = {'AMETHYSTS' : [], 'STARFRUIT' : [], 'ORCHIDS' : [], 'CHOCOLATE' : [], 'STRAWBERRIES': [], 'ROSE' : [], 'GIFT_BASKET' : []}
 
         # set variables (will change by iterations)
 
@@ -506,6 +594,12 @@ class Trader:
         acc_ask = {'AMETHYSTS' : AMETHYSTS_ub, 'STARFRUIT' : STARFRUIT_ub, 'ORCHIDS' : orchids_ub}
 
         self.steps += 1
+
+        orders = self.compute_orders_basket(state.order_depths)
+        result['GIFT_BASKET'] += orders['GIFT_BASKET']
+        result['CHOCOLATE'] += orders['CHOCOLATE']
+        result['STRAWBERRIES'] += orders['STRAWBERRIES']
+        result['ROSE'] += orders['ROSE']
 
         # compute orders for all products
 
