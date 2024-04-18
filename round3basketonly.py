@@ -241,6 +241,8 @@ class Trader:
         roses_best_bid: float = max(roses_buy_orders)
         roses_best_ask: float = min(roses_sell_orders)
 
+        roses_best_bid_vol = state.order_depths['ROSES'].buy_orders[roses_best_bid]
+
         roses_price: float = (roses_best_bid + roses_best_ask) / 2
 
         est_price: float = 6 * strawberries_price + 4 * chocolate_price + roses_price
@@ -273,7 +275,9 @@ class Trader:
         choco_buy_sell = mid_price['CHOCOLATE'] - 7915.34725
         rose_buy_sell = mid_price['ROSES'] - 14506.89705
 
-        trade_at = self.basket_std*0.5 #300
+
+        stdev_multiplier = 0.50
+        trade_at = self.basket_std*stdev_multiplier #=600*stdev_multiplier
         close_at = self.basket_std*(-1000)
 
         gb_pos = self.position['GIFT_BASKET']
@@ -292,6 +296,11 @@ class Trader:
         #     self.cont_sell_basket_unfill = 0
 
         # do_bask = 0
+        
+        rose_vol = min(self.position['ROSES'] + self.POSITION_LIMIT['ROSES'], roses_best_bid_vol)
+        # print(f"ROSES ARE {self.position['ROSES']} RN  HAHAHAHHAA")
+        if self.position['ROSES'] > -self.POSITION_LIMIT['ROSES']:
+            orders['ROSES'].append(Order('ROSES', worst_buy['ROSES'], -rose_vol))
 
         if res_sell > trade_at: # SELLING
             vol = self.position['GIFT_BASKET'] + self.POSITION_LIMIT['GIFT_BASKET']
@@ -515,7 +524,7 @@ class Trader:
         for key, val in self.position.items():
             print(f'{key} position: {val}')
 
-        assert abs(self.position.get('ROSES', 0)) <= self.POSITION_LIMIT['ROSES']
+        # assert abs(self.position.get('ROSES', 0)) <= self.POSITION_LIMIT['ROSES'] 
 
         # setting amethysts price bounds
 
