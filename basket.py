@@ -118,7 +118,7 @@ class Trader:
                 # stop_loss = 0.01
 
                 #if price_nav_ratio < self.basket_pnav_ratio - self.basket_eps:
-                if z_score_diff < -2.2:
+                if z_score_diff < -2.8:
                     # stop_loss_price = self.etf_returns[-2] 
 
 
@@ -157,7 +157,7 @@ class Trader:
                     
                      
                 #elif price_nav_ratio > self.basket_pnav_ratio + self.basket_eps:
-                elif z_score_diff > 2.2:
+                elif z_score_diff > 1.4:
                     # ETF is overvalued! -> we sell ETF and buy individual assets!
                     # Finds volume to buy that is within position limit
                     #basket_best_bid_vol = min(self.basket_limit-basket_pos, state.order_depths['GIFT_BASKET'].buy_orders[basket_best_bid])
