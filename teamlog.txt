@@ -44,3 +44,9 @@ Sat, 13 Apr
 Wed, 17 Apr
 - yt video for last year https://www.youtube.com/watch?v=ax6T6dhuxys
 - average basket premium is 370.2676267626763
+- using baskets only gives a higher profit
+- tried checking if components are overvalued or not using individual mean and std
+- but performance was subpar
+- perhaps basket case is stronger due to 4 variables
+- still need to include amethysts, orchids, and starfruit !!! @abdulwadood
+
