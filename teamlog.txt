@@ -51,3 +51,9 @@ Thu, 18 Apr
 - perhaps basket case is stronger due to 4 variables
 - still need to include amethysts, orchids, and starfruit !!! @abdulwadood
 
+Thu, 18 Apr
+- current strategy is trading baskets on overvalued and undervalued
+- we hardcode rose shorting but a better strategy might be to buy back when the price starts rising and short once more once the rise ends
+- still need to include orchids ! @abdulwadood
+- for manual, analyze the graph by PNL in combo with human psychology when it comes to picking numbers !
+- be one step ahead of everyone's predictions inshaAllah
