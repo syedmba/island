@@ -236,6 +236,8 @@ class Trader:
         roses_best_bid: float = max(roses_buy_orders)
         roses_best_ask: float = min(roses_sell_orders)
 
+        roses_best_bid_vol = state.order_depths['ROSES'].buy_orders[roses_best_bid]
+
         roses_price: float = (roses_best_bid + roses_best_ask) / 2
 
         est_price: float = 6 * strawberries_price + 4 * chocolate_price + roses_price
@@ -273,6 +275,11 @@ class Trader:
 
         gb_pos = self.position['GIFT_BASKET']
         gb_neg = self.position['GIFT_BASKET']
+
+        rose_vol = min(self.position['ROSES'] + self.POSITION_LIMIT['ROSES'], roses_best_bid_vol)
+        # print(f"ROSES ARE {self.position['ROSES']} RN  HAHAHAHHAA")
+        if self.position['ROSES'] > -self.POSITION_LIMIT['ROSES']:
+            orders['ROSES'].append(Order('ROSES', worst_buy['ROSES'], -rose_vol))
 
         if res_sell > trade_at: # SELLING
             vol = self.position['GIFT_BASKET'] + self.POSITION_LIMIT['GIFT_BASKET']
