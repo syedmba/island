@@ -470,18 +470,18 @@ class Trader:
         #     if vol > 0:
         #         orders['STRAWBERRIES'].append(Order('STRAWBERRIES', worst_sell['STRAWBERRIES'], vol))
         
-        # FOR ROSES
-        if rose_buy_sell > self.rose_std*0.5: # SELLING because overvalued
-            vol = self.position['ROSES'] + self.POSITION_LIMIT['ROSES']
-            assert(vol >= 0)
-            if vol > 0:
-                orders['ROSES'].append(Order('ROSES', worst_buy['ROSES'], -vol)) 
+        # # FOR ROSES
+        # if rose_buy_sell > self.rose_std*0.5: # SELLING because overvalued
+        #     vol = self.position['ROSES'] + self.POSITION_LIMIT['ROSES']
+        #     assert(vol >= 0)
+        #     if vol > 0:
+        #         orders['ROSES'].append(Order('ROSES', worst_buy['ROSES'], -vol)) 
 
-        elif rose_buy_sell < -self.rose_std*0.5: # BUYING
-            vol = self.POSITION_LIMIT['ROSES'] - self.position['ROSES']
-            assert(vol >= 0)
-            if vol > 0:
-                orders['ROSES'].append(Order('ROSES', worst_sell['ROSES'], vol))
+        # elif rose_buy_sell < -self.rose_std*0.5: # BUYING
+        #     vol = self.POSITION_LIMIT['ROSES'] - self.position['ROSES']
+        #     assert(vol >= 0)
+        #     if vol > 0:
+        #         orders['ROSES'].append(Order('ROSES', worst_sell['ROSES'], vol))
 
         return orders
 
