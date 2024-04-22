@@ -29,12 +29,6 @@ class Trader:
     STARFRUIT_cache = []
     STARFRUIT_dim = 3
 
-    sun_cache = []
-    sun_dim = 3
-
-    hum_cache = []
-    hum_dim = 3
-
     steps = 0
 
     # cont_buy_basket_unfill = 0
@@ -58,24 +52,6 @@ class Trader:
     begin_diff_bag = -INF
     begin_bag_price = -INF
     begin_CHOCOLATE_price = -INF
-
-    def predict_sunlight(self):
-        coef = [1.03037314e+00, -2.25013886e-06, -3.03795021e-02]
-        intercept = 0.017696349974357872
-        nxt_sun = intercept
-        for i, val in enumerate(self.sun_cache):
-            nxt_sun += val * coef[i]
-
-        return int(round(nxt_sun))
-    
-    def predict_humidity(self):
-        coef = [1.01254311e+00, -3.38481111e-06, -1.25578231e-02]
-        intercept = 0.0011386486631153048
-        nxt_hum = intercept
-        for i, val in enumerate(self.hum_cache):
-            nxt_hum += val * coef[i]
-
-        return int(round(nxt_hum))
 
     def calc_next_price_STARFRUIT(self):
         coef = [0.39374153, 0.32139952, 0.28181973]
@@ -241,44 +217,41 @@ class Trader:
         # net value from selling to south island
         south_sell_value = south_bid - south_transport_fees - south_export_tariff
 
-        # adjust sunlight and humidity information, and make next predictions
-        if len(self.sun_cache) == self.sun_dim:
-            self.sun_cache.pop(0)
-
-        self.sun_cache.append(south_sunlight)
-
-        if len(self.hum_cache) == self.hum_dim:
-            self.hum_cache.pop(0)
-
-        self.hum_cache.append(south_humidity)
-
-        next_sun = self.predict_sunlight()
-        next_hum = self.predict_humidity()
-
         # sort sell orders in ascending order of price (lowest first)
         osell = collections.OrderedDict(sorted(order_depth.sell_orders.items()))
         # sort buy orders in descending order of price (highest first)
         obuy = collections.OrderedDict(sorted(order_depth.buy_orders.items(), reverse=True))
 
         sell_vol, best_sell_pr = self.values_extract(osell)
-        print(f"best sell price for orchids is {best_sell_pr}")
         buy_vol, best_buy_pr = self.values_extract(obuy, 1)
-        print(f"best buy price for orchids is {best_buy_pr}")
 
-        # if sunlight or humidity out of range, then supply decreases so price increases, so long
-        if next_hum < 60 or next_hum > 80:
-            # go long
-            if self.position[product] < LIMIT:
-                vol = LIMIT - self.position[product]
-                orders.append(Order("ORCHIDS", best_buy_pr, vol))
-                self.position[product] += vol
-        # if sunlight and humidity in range later, supply increases so price decreases, so short
-        if (south_humidity < 60 or south_humidity > 80) and (next_hum > 60 and next_hum < 80):
-            # go short in our exchange
-            if self.position[product] > -LIMIT:
-                vol = -LIMIT - self.position[product]
-                orders.append(Order("ORCHIDS", best_sell_pr, vol))
-                self.position[product] += vol
+        # find profitable trade on south island
+        # cases in which we trade:
+        # 1) if someone is selling for cheaper on south and buying for more here
+        # 2) if someone is buying for more in south and selling for less here
+        # 3) if someone is buying for more here and we can sell directly here
+        # 4) if someone is selling for less here and we can buy directly here
+
+        # buying logic (buy from wherever it is cheaper)
+        if south_buy_cost < best_buy_pr:
+            cpos = self.position[product]
+            # to buy from south
+            if cpos < LIMIT:
+                with_south = True
+                print("trading with south")
+                vol = LIMIT - cpos
+                orders.append(Order(product, int(south_ask), vol))
+        elif south_buy_cost >= best_buy_pr:
+            cpos = self.position[product]
+            # to find buying opportunity in own exchange    
+            for ask, vol in osell.items():
+                if ((ask <= acc_bid) or ((self.position[product] < 0) and (ask == acc_bid + 1))) and cpos < LIMIT:
+                    order_for = min(-vol, LIMIT - cpos)
+                    cpos += order_for
+                    assert(order_for >= 0)
+                    orders.append(Order(product, ask, order_for))
+
+        # selling logic (sell wherever it is higher)
 
         return with_south, orders
     
@@ -534,7 +507,7 @@ class Trader:
         #         orders['ROSES'].append(Order('ROSES', worst_buy['ROSES'], -vol)) 
 
         # elif rose_buy_sell < -self.rose_std*0.5: # BUYING
-        #     vol = self.POSITION_LIMIT['ROSES'] self.position['ROSES']
+        #     vol = self.POSITION_LIMIT['ROSES'] - self.position['ROSES']
         #     assert(vol >= 0)
         #     if vol > 0:
         #         orders['ROSES'].append(Order('ROSES', worst_sell['ROSES'], vol))
@@ -569,6 +542,9 @@ class Trader:
 
         for key, val in state.position.items():
             self.position[key] = val
+        print()
+        for key, val in self.position.items():
+            print(f'{key} position: {val}')
 
         assert abs(self.position.get('ROSES', 0)) <= self.POSITION_LIMIT['ROSES']
 
@@ -610,6 +586,7 @@ class Trader:
             b_vol += vol
 
         orchids_lb = b / b_vol
+        print(f"orchids buy price: {orchids_lb} for order_book: {orchid_buys}")
 
         for price, vol in orchid_sells.items():
             s += (price * vol)
@@ -625,7 +602,7 @@ class Trader:
         acc_ask = {'AMETHYSTS' : AMETHYSTS_ub, 'STARFRUIT' : STARFRUIT_ub, "ORCHIDS" : orchids_ub}
 
         with_south, orders = self.compute_orders_orchids(observations, 'ORCHIDS', state.order_depths['ORCHIDS'], orchids_lb, orchids_ub, self.POSITION_LIMIT['ORCHIDS'])
-
+    
         if with_south:
             conversions += 1
 
