@@ -63,6 +63,9 @@ class Trader:
     begin_bag_price = -INF
     begin_CHOCOLATE_price = -INF
 
+    def newton_raphson():
+        pass
+
     def normCdf(self, x):
         # pre-determined values using rational minimax approximation. No need to worry about them as they're just here to give a good estimate.
         a1 = 0.254829592
@@ -582,9 +585,53 @@ class Trader:
 
         return orders
 
-    def compute_orders_coconuts(self, product, order_depth):
-        # lin reg model, just like amethysts
-        pass
+    def compute_orders_coconuts(self, product, order_depth, acc_bid, acc_ask, LIMIT):
+        # lin reg model, just like starfruits
+        orders: list[Order] = []
+
+        osell = collections.OrderedDict(sorted(order_depth.sell_orders.items()))
+        obuy = collections.OrderedDict(sorted(order_depth.buy_orders.items(), reverse=True))
+
+        sell_vol, best_sell_pr = self.values_extract(osell)
+        buy_vol, best_buy_pr = self.values_extract(obuy, 1)
+
+        cpos = self.position[product]
+
+        for ask, vol in osell.items():
+            if ((ask <= acc_bid) or ((self.position[product] < 0) and (ask == acc_bid + 1))) and cpos < LIMIT:
+                order_for = min(-vol, LIMIT - cpos)
+                cpos += order_for
+                assert(order_for >= 0)
+                orders.append(Order(product, ask, order_for))
+
+        undercut_buy = best_buy_pr + 1
+        undercut_sell = best_sell_pr - 1
+
+        bid_pr = min(undercut_buy, acc_bid) # we will shift this by 1 to beat this price
+        sell_pr = max(undercut_sell, acc_ask)
+
+        if cpos < LIMIT:
+            num = LIMIT - cpos
+            orders.append(Order(product, bid_pr, num))
+            cpos += num
+        
+        cpos = self.position[product]
+        
+
+        for bid, vol in obuy.items():
+            if ((bid >= acc_ask) or ((self.position[product]>0) and (bid+1 == acc_ask))) and cpos > -LIMIT:
+                order_for = max(-vol, -LIMIT-cpos)
+                # order_for is a negative number denoting how much we will sell
+                cpos += order_for
+                assert(order_for <= 0)
+                orders.append(Order(product, bid, order_for))
+
+        if cpos > -LIMIT:
+            num = -LIMIT-cpos
+            orders.append(Order(product, sell_pr, num))
+            cpos += num
+
+        return orders
 
     def compute_orders_coupons(self, product, order_depth):
         # strategy:
@@ -612,7 +659,7 @@ class Trader:
     def run(self, state: TradingState) -> Dict[str, List[Order]]:
         # Initialize the method output dict as an empty dict
 
-        result = {'AMETHYSTS' : [], 'STARFRUIT' : [], 'ORCHIDS': [], 'CHOCOLATE' : [], 'STRAWBERRIES': [], 'ROSES' : [], 'GIFT_BASKET' : []}
+        result = {'AMETHYSTS' : [], 'STARFRUIT' : [], 'ORCHIDS': [], 'CHOCOLATE' : [], 'STRAWBERRIES': [], 'ROSES' : [], 'GIFT_BASKET' : [], 'COCONUT': [], "COCONUT_COUPON": []}
 
         # set variables (will change by iterations)
 
@@ -711,11 +758,25 @@ class Trader:
 
         # trading logic for coconuts and coupons
 
-        coc_orders = self.compute_orders_coconuts('COCONUT', state.order_depths['COCONUT'])
-        coup_orders = self.compute_orders_coupons('COCONUT_COUPON', state.order_depths['COCONUT_COUPON'])
-        result['COCONUT'] += coc_orders
-        result['COCONUT_COUPON'] += coup_orders
+        if len(self.coc_cache) == self.coc_dim:
+            self.coc_cache.pop(0)
 
+        _, bs_coc = self.values_extract(collections.OrderedDict(sorted(state.order_depths['COCONUT'].sell_orders.items())))
+        _, bb_coc = self.values_extract(collections.OrderedDict(sorted(state.order_depths['COCONUT'].buy_orders.items(), reverse=True)), 1)
+
+        self.coc_cache.append((bs_coc + bb_coc) / 2)
+
+        coc_lb = -INF
+        coc_ub = INF
+
+        if len(self.coc_cache) == self.coc_dim:
+            coc_lb = self.calc_next_price_coconut() - 1
+            coc_ub = self.calc_next_price_coconut() + 1
+
+        coc_orders = self.compute_orders_coconuts('COCONUT', state.order_depths['COCONUT'], coc_lb, coc_ub, self.POSITION_LIMIT['COCONUT'])
+        coup_orders = self.compute_orders_coupons('COCONUT_COUPON', state.order_depths['COCONUT_COUPON'])
+        # result['COCONUT'] += coc_orders
+        # result['COCONUT_COUPON'] += coup_orders
 
         # compute orders for all products
 
@@ -733,3 +794,5 @@ class Trader:
         traderData = "NameError"
 
         return result, conversions, traderData
+    
+# 794 (796 with this)
