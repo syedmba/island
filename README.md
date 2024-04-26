@@ -1,12 +1,14 @@
 # island
 <h1>IMC Trading Challenge</h1>
 
-<h2>Team Name : NameError</h2>
-<h2>Members: Abdulwadood Ashraf Faazli, Syed Muhammad Bin Asif</h2>
-<h2>Final Rank : TBD</h2>
+<h2>Team Details</h2> 
+<b>Name</b> : NameError
+<b>Members</b> : Abdulwadood Ashraf Faazli, Syed Muhammad Bin Asif
+<b>Final Rank</b> : TBD
 
+<h2>Algo Trading Challenges</h2>
 <b>Round 1</b>
-We used market-making on starfruit and linear regression on amethysts
+We used market-making on starfruit and linear regression on amethysts, making steady profit.
 
 <b>Round 2</b>
 Sadly, we did not have the time to code our intended strategy for orchids. We had in mind classifying real-world scenarios of how humidity and sunlight vary with respect to each other, then trade by identifying the current scenario and applying our corresponding model for future sunlight and humidity. This would allow us to predict orchid price fluctuation in the future and use import tariffs to make huge profits.
