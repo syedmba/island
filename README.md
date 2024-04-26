@@ -2,6 +2,7 @@
 <h1>IMC Trading Challenge</h1>
 
 <h2>Team Details</h2> 
+
 <b>Name</b> : NameError
 
 <b>Members</b> : Abdulwadood Ashraf Faazli, Syed Muhammad Bin Asif
