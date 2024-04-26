@@ -267,7 +267,7 @@ class Trader:
         return orders
     
     def compute_orders_basket(self, order_depth):
-
+        
         orders = {'DIP' : [], 'BAGUETTE': [], 'UKULELE' : [], 'PICNIC_BASKET' : []}
         prods = ['DIP', 'BAGUETTE', 'UKULELE', 'PICNIC_BASKET']
         osell, obuy, best_sell, best_buy, worst_sell, worst_buy, mid_price, vol_buy, vol_sell = {}, {}, {}, {}, {}, {}, {}, {}, {}
