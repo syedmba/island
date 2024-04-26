@@ -1,3 +1,8 @@
+# NOT OUR ORIGINAL CODE
+# FOR REFERENCE AND LEARNING ONLY
+
+
+
 from typing import Dict, List
 from datamodel import OrderDepth, TradingState, Order
 import collections
